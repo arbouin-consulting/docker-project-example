@@ -1,0 +1,76 @@
+version: "3"
+
+dotenv: [".env"]
+
+tasks:
+  default:
+    cmds:
+      - task -l
+
+  hosts:
+    desc: Add host into /etc/hosts
+    cmds:
+      - echo "127.0.0.1  bookstack.example.local" | sudo tee -a /etc/hosts
+      - echo "::1        bookstack.example.local" | sudo tee -a /etc/hosts
+
+  hosts:delete:
+    desc: Delete line
+    cmds:
+      - sudo sed -i '$ d' /etc/hosts
+      - sudo sed -i '$ d' /etc/hosts
+
+  build:
+    desc: 'Build image Bookstack php'
+    cmds:
+      - cd app1 && BOOKSTACK_VERSION={{.BOOKSTACK_VERSION}} docker-compose build
+    env:
+      COMPOSE_DOCKER_CLI_BUILD: 1
+      DOCKER_BUILDKIT: 1
+    vars:
+      BOOKSTACK_VERSION: '{{default .BOOKSTACK_VERSION .CLI_ARGS}}'
+  
+  run:all:
+    desc: Run all apps
+    cmds:
+      - task: hosts
+      - task: run:traefik
+      - task: run:app1
+#      - task: run:app2
+
+  run:traefik:
+    desc: Run traefik
+    cmds:
+      - docker-compose up -d
+
+  run:app1:
+    desc: Run Boockstack
+    cmds:
+      - cd app1 && docker-compose up -d
+
+  run:app2:
+    desc: Run GLPI
+    cmds:
+      - cd app2 && docker-compose up -d
+
+  down:all:
+    desc: Down all apps
+    cmds:
+      - task: down:traefik
+      - task: down:app1
+#      - task: down:app2
+      - task: hosts:delete
+
+  down:traefik:
+    desc: Down traefik
+    cmds:
+      - docker-compose down
+
+  down:app1:
+    desc: Down Boockstack
+    cmds:
+      - cd app1 && docker-compose down
+
+  down:app2:
+    desc: Down GLPI
+    cmds:
+      - cd app2 && docker-compose down
