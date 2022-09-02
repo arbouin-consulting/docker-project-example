@@ -10,14 +10,18 @@ tasks:
   hosts:
     desc: Add host into /etc/hosts
     cmds:
-      - echo "127.0.0.1  bookstack.example.local" | sudo tee -a /etc/hosts
-      - echo "::1        bookstack.example.local" | sudo tee -a /etc/hosts
+      - cmd: docker network create reverse-proxy
+        ignore_error: true
+      - cmd: docker network create bookstack
+        ignore_error: true
+      - echo "127.0.0.1  *.example.local" | sudo tee -a /etc/hosts
 
   hosts:delete:
     desc: Delete line
     cmds:
-      - sudo sed -i '$ d' /etc/hosts
-      - sudo sed -i '$ d' /etc/hosts
+      - docker network remove reverse-proxy bookstack
+      - cmd: sudo sed -i '$ d' /etc/hosts
+        ignore_error: true
 
   build:
     desc: 'Build image Bookstack php'
