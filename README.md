@@ -2,7 +2,7 @@
 
 For development multi application, we will set up an architecture to use DNS instead of  `localhost:port`.
 
-We will use `raefik` as a reverse proxy.
+We will use `Traefik` as a reverse proxy.
 
 The proposed architecture will be as follows:
 ```
