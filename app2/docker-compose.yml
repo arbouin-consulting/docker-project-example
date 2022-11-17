@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  front:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: front
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front-node.rule=Host(`front-node.example.local`)"
+      - "traefik.http.routers.front-node.entrypoints=web"
+    working_dir: /app
+    command: yarn dev --host 0.0.0.0
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./src:/app/src
+      - ./index.html:/app/index.html
+    networks:
+      - netflux
+
+networks:
+  netflux:
+    external: true
