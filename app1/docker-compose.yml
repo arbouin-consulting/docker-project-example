@@ -14,18 +14,18 @@ services:
     image: bookstack/nginx:${BOOKSTACK_VERSION}
     container_name: nginx
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.bookstack.rule=Host(`bookstack.example.local`)"
-      - "traefik.http.routers.bookstack.entrypoints=web"
+      - traefik.enable=true
+      - traefik.http.routers.app1.rule=Host(`bookstack.example.local`)
+      - traefik.http.routers.app1.entrypoints=web
     depends_on:
-      - app
+      - php
     volumes:
       - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - reverse-proxy
-      - bookstack
+      - app1
 
-  app:
+  php:
     build:
       context: .
       dockerfile: Dockerfile
@@ -33,7 +33,7 @@ services:
       args:
         BOOKSTACK_VERSION: ${BOOKSTACK_VERSION}
     image: bookstack/app:${BOOKSTACK_VERSION}
-    container_name: app
+    container_name: php
     depends_on:
       - mariadb
     environment:
@@ -50,7 +50,7 @@ services:
     volumes:
       - ./docker-entrypoint.sh:/root/docker-entrypoint.sh:ro
     networks:
-      - bookstack
+      - app1
 
   mariadb:
     image: mariadb:10.5
@@ -63,7 +63,7 @@ services:
     volumes:
       - db:/var/lib/mysql
     networks:
-      - bookstack
+      - app1
 
   mailhog:
     image: mailhog/mailhog
@@ -71,10 +71,10 @@ services:
     ports:
       - ${DEV_MAIL_PORT:-8025}:8025
     networks:
-      - bookstack
+      - app1
 
 networks:
   reverse-proxy:
     external: true
-  bookstack:
+  app1:
     external: true

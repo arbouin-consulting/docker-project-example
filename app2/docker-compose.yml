@@ -7,19 +7,23 @@ services:
       dockerfile: Dockerfile
     container_name: front
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.front-node.rule=Host(`front-node.example.local`)"
-      - "traefik.http.routers.front-node.entrypoints=web"
+      - traefik.enable=true
+      - traefik.http.routers.app2.rule=Host(`front-node.example.local`)
+      - traefik.http.routers.app2.entrypoints=web
+      - traefik.http.services.app2.loadbalancer.server.port=5173
     working_dir: /app
     command: yarn dev --host 0.0.0.0
-    ports:
-      - "5173:5173"
+#    ports:
+#      - "5173:5173"
     volumes:
       - ./src:/app/src
       - ./index.html:/app/index.html
     networks:
-      - netflux
+      - app2
+      - reverse-proxy
 
 networks:
-  netflux:
+  app2:
+    external: true
+  reverse-proxy:
     external: true

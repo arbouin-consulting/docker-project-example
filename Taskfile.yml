@@ -12,15 +12,21 @@ tasks:
     cmds:
       - cmd: docker network create reverse-proxy
         ignore_error: true
-      - cmd: docker network create bookstack
+      - cmd: docker network create app1
         ignore_error: true
-      - echo "127.0.0.1  *.example.local" | sudo tee -a /etc/hosts
+      - cmd: docker network create app2
+        ignore_error: true
+      - echo "127.0.0.1  bookstack.example.local" | sudo tee -a /etc/hosts
+      - echo "::1  bookstack.example.local" | sudo tee -a /etc/hosts
+      - echo "127.0.0.1  front-node.example.local" | sudo tee -a /etc/hosts
+      - echo "::1  front-node.example.local" | sudo tee -a /etc/hosts
 
   hosts:delete:
     desc: Delete line
     cmds:
-      - docker network remove reverse-proxy bookstack
-      - cmd: sudo sed -i '$ d' /etc/hosts
+      - cmd: docker network remove reverse-proxy app1 app2
+        ignore_error: true
+      - cmd: head -n -4 /etc/hosts | sudo tee /etc/hosts
         ignore_error: true
 
   build:
@@ -39,7 +45,7 @@ tasks:
       - task: hosts
       - task: run:traefik
       - task: run:app1
-#      - task: run:app2
+      - task: run:app2
 
   run:traefik:
     desc: Run traefik
@@ -47,7 +53,7 @@ tasks:
       - docker-compose up -d
 
   run:app1:
-    desc: Run Boockstack
+    desc: Run Bookstack
     cmds:
       - cd app1 && docker-compose up -d
 
@@ -61,7 +67,7 @@ tasks:
     cmds:
       - task: down:traefik
       - task: down:app1
-#      - task: down:app2
+      - task: down:app2
       - task: hosts:delete
 
   down:traefik:
